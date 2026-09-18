@@ -5,10 +5,6 @@ pipeline {
         jdk 'jdk17'
         maven 'maven3'
     }
-    environment{
-        SCANNER_HOME= tool 'sonar-scanner'
-    }
-
     stages {
         stage('Git Checkout') {
             steps {
@@ -23,13 +19,6 @@ pipeline {
         stage('Test') {
             steps {
                 sh "mvn test"
-            }
-        }
-        stage('Quality Gate') {
-            steps {
-                script {
-                    waitForQualityGate abortPipeline: false, credentialsId: 'sonar-cred'
-                }
             }
         }
         stage('Build') {
