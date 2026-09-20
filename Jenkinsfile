@@ -27,13 +27,17 @@ pipeline {
 
         stage('Docker Build & Push') {
             steps {
-                withDockerRegistry(
+                withCredentials([usernamePassword(
                     credentialsId: 'docker-cred',
-                    toolName: 'docker'
-                ) {
+                    usernameVariable: 'DOCKER_USERNAME',
+                    passwordVariable: 'DOCKER_PASSWORD'
+                )]) {
                     sh '''
+                        set -e
+                        echo "$DOCKER_PASSWORD" | docker login --username "$DOCKER_USERNAME" --password-stdin
                         docker build -t rutwik02/boardgame:latest .
                         docker push rutwik02/boardgame:latest
+                        docker logout
                     '''
                 }
             }
