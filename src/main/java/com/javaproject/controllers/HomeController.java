@@ -4,11 +4,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Lazy;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.User;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.provisioning.JdbcUserDetailsManager;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -27,18 +26,16 @@ import com.javaproject.database.DatabaseAccess;
 public class HomeController {
 
     @Autowired
-    DatabaseAccess da;
+    private DatabaseAccess da;
 
     @Autowired
-    @Lazy
-    private BCryptPasswordEncoder passwordEncoder;
+    private PasswordEncoder passwordEncoder;
 
     @Autowired
     private JdbcUserDetailsManager jdbcUserDetailsManager;
 
     @GetMapping("/newUser")
     public String newUser(Model model) {
-
         List<String> authorities = da.getAuthorities();
         model.addAttribute("authorities", authorities);
         return "new-user";
@@ -130,8 +127,7 @@ public class HomeController {
             returnValue = da.addReview(review);
         }
         System.out.println("return value is: " + returnValue);
-        return "redirect:/" + review.getGameId() +
-                "/reviews";
+        return "redirect:/" + review.getGameId() + "/reviews";
     }
 
     @GetMapping("/deleteReview/{id}")
