@@ -2,8 +2,8 @@ pipeline {
     agent any
 
     tools {
-    jdk 'Jdk21'     // Replace with your exact Jenkins tool name
-    maven 'maven-3.9' // Replace with your exact Jenkins tool name
+        jdk 'JDK21'     // Ensure this matches your JDK 21 name in Jenkins Tools
+        maven 'maven3'  // Ensure this matches your Maven name in Jenkins Tools
     }
 
     stages {
@@ -17,6 +17,8 @@ pipeline {
 
         stage('Build') {
             steps {
+                // Verifies Java version before executing Maven
+                sh 'java -version'
                 sh 'mvn clean package'
             }
         }
@@ -48,6 +50,3 @@ pipeline {
         }
     }
 }
-
- 
-    
