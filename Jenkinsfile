@@ -1,6 +1,11 @@
 pipeline {
     agent any
 
+    tools {
+        jdk 'JDK21'
+        maven 'maven3'
+    }
+
     stages {
         stage('Checkout') {
             steps {
@@ -15,7 +20,6 @@ pipeline {
                 sh '''
                     export JAVA_HOME=/usr/lib/jvm/java-21-amazon-corretto.x86_64
                     export PATH=$JAVA_HOME/bin:$PATH
-                    java -version
                     mvn clean package
                 '''
             }
