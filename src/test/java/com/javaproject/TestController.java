@@ -69,8 +69,16 @@ class TestController {
         List<BoardGame> boardGames = da.getBoardGames();
         Long boardgameId = boardGames.get(0).getId();
 
+        Review newReview = new Review();
+        newReview.setGameId(boardgameId);
+        newReview.setText("Review created for edit test");
+        da.addReview(newReview);
+
         List<Review> reviews = da.getReviews(boardgameId);
-        Review review = reviews.get(0);
+        Review review = reviews.stream()
+            .filter(existingReview -> "Review created for edit test".equals(existingReview.getText()))
+            .findFirst()
+            .orElseThrow();
         Long reviewId = review.getId();
 
         review.setText("Edited text");
@@ -88,8 +96,17 @@ class TestController {
         List<BoardGame> boardGames = da.getBoardGames();
         Long boardgameId = boardGames.get(0).getId();
 
+        Review newReview = new Review();
+        newReview.setGameId(boardgameId);
+        newReview.setText("Review created for delete test");
+        da.addReview(newReview);
+
         List<Review> reviews = da.getReviews(boardgameId);
-        Long reviewId = reviews.get(0).getId();
+        Review review = reviews.stream()
+            .filter(existingReview -> "Review created for delete test".equals(existingReview.getText()))
+            .findFirst()
+            .orElseThrow();
+        Long reviewId = review.getId();
 
         int origSize = reviews.size();
 
