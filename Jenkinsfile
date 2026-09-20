@@ -1,54 +1,38 @@
-pipeline {
-    agent any
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: boardgame-deployment
+spec:
+  selector:
+    matchLabels:
+      app: boardgame
+  replicas: 2
+  template:
+    metadata:
+      labels:
+        app: boardgame
+    spec:
+      containers:
+        - name: boardgame
+          image: rutwik02/boardgame:latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8080
 
-    tools {
-        jdk 'jdk21'
-        maven 'maven3'
-    }
+---
 
-    stages {
-
-        stage('Checkout') {
-            steps {
-                git branch: 'main',
-                    credentialsId: 'git-cred',
-                    url: 'https://github.com/rutwik1234-git/BoardGame.git'
-            }
-        }
-
-        stage('Build') {
-            steps {
-                sh 'mvn clean package'
-            }
-        }
-
-        stage('Docker Build & Push') {
-            steps {
-                withDockerRegistry(
-                    credentialsId: 'docker-cred',
-                    toolName: 'docker'
-                ) {
-                    sh '''
-                        docker build -t shettyadarsha/boardgame:latest .
-                        docker push shettyadarsha/boardgame:latest
-                    '''
-                }
-            }
-        }
-
-        stage('Deploy') {
-            steps {
-                withKubeConfig(
-                    credentialsId: 'k8s-cred',
-                    serverUrl: 'https://172.31.1.224:6443',
-                    namespace: 'webapps'
-                ) {
-                    sh 'kubectl apply -f deployment-service.yaml'
-                }
-            }
-        }
-    }
-}
+apiVersion: v1
+kind: Service
+metadata:
+  name: boardgame-ssvc
+spec:
+  selector:
+    app: boardgame
+  ports:
+    - protocol: "TCP"
+      port: 80
+      targetPort: 8080
+  type: LoadBalancer
 
  
     
