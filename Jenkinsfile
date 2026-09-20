@@ -45,12 +45,11 @@ pipeline {
 
         stage('Deploy') {
             steps {
-                withKubeConfig(
+                withCredentials([file(
                     credentialsId: 'k8s-cred',
-                    serverUrl: 'https://172.31.1.224:6443',
-                    namespace: 'webapps'
-                ) {
-                    sh 'kubectl apply -f deployment-service.yaml'
+                    variable: 'KUBECONFIG'
+                )]) {
+                    sh 'kubectl --kubeconfig "$KUBECONFIG" apply -f deployment-service.yaml'
                 }
             }
         }
