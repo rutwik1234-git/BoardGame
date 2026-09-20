@@ -1,15 +1,10 @@
 package com.javaproject.database;
 
 import java.util.List;
-
-import javax.sql.DataSource;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
-import org.springframework.jdbc.support.GeneratedKeyHolder;
-import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
 
 import com.javaproject.beans.BoardGame;
@@ -19,96 +14,88 @@ import com.javaproject.beans.Review;
 public class DatabaseAccess {
 
     @Autowired
-    private NamedParameterJdbcTemplate jdbc;
+    protected NamedParameterJdbcTemplate jdbc;
 
-    public List<String> getAuthorities() {
-        MapSqlParameterSource namedParameters = new MapSqlParameterSource();
-        String query = "SELECT DISTINCT authority FROM authorities";
-        return jdbc.queryForList(query, namedParameters, String.class);
-    }
+    // --- BoardGame Operations ---
 
     public List<BoardGame> getBoardGames() {
         String query = "SELECT * FROM boardgames";
-        BeanPropertyRowMapper<BoardGame> boardgameMapper = BeanPropertyRowMapper.newInstance(BoardGame.class);
-        return jdbc.query(query, boardgameMapper);
+        return jdbc.query(query, new BeanPropertyRowMapper<>(BoardGame.class));
     }
 
     public BoardGame getBoardGame(Long id) {
         MapSqlParameterSource namedParameters = new MapSqlParameterSource();
         String query = "SELECT * FROM boardgames WHERE id = :id";
         namedParameters.addValue("id", id);
-        BeanPropertyRowMapper<BoardGame> boardgameMapper = BeanPropertyRowMapper.newInstance(BoardGame.class);
-        List<BoardGame> boardgames = jdbc.query(query, namedParameters, boardgameMapper);
-        if (boardgames.isEmpty()) {
-            return null;
-        } else {
-            return boardgames.get(0);
-        }
+
+        List<BoardGame> games = jdbc.query(query, namedParameters, new BeanPropertyRowMapper<>(BoardGame.class));
+        return games.isEmpty() ? null : games.get(0);
     }
 
-    public List<Review> getReviews(Long id) {
-        MapSqlParameterSource namedParameters = new MapSqlParameterSource();
-        String query = "SELECT * FROM reviews WHERE gameId = :id";
-        namedParameters.addValue("id", id);
-        BeanPropertyRowMapper<Review> reviewMapper = BeanPropertyRowMapper.newInstance(Review.class);
-        List<Review> reviews = jdbc.query(query, namedParameters, reviewMapper);
-        if (reviews.isEmpty()) {
-            return null;
-        } else {
-            return reviews;
-        }
+    // Alias for getBoardGame to maintain compatibility across controllers
+    public BoardGame getBoardGameById(Long id) {
+        return getBoardGame(id);
     }
 
-    public Long addBoardGame(BoardGame boardgame) {
+    public void addBoardGame(BoardGame game) {
         MapSqlParameterSource namedParameters = new MapSqlParameterSource();
-        String query = "INSERT INTO boardgames (name, level, minPlayers, maxPlayers, gameType) VALUES (:name, :level, :minPlayers, :maxPlayers, :gameType)";
-        namedParameters
-                .addValue("name", boardgame.getName())
-                .addValue("level", boardgame.getLevel())
-                .addValue("minPlayers", boardgame.getMinPlayers())
-                .addValue("maxPlayers", boardgame.getMaxPlayers())
-                .addValue("gameType", boardgame.getGameType());
-        KeyHolder generatedKey = new GeneratedKeyHolder();
-        int returnValue = jdbc.update(query, namedParameters, generatedKey);
-        Number key = generatedKey.getKey();
-        return (returnValue > 0 && key != null) ? key.longValue() : 0L;
+        String query = "INSERT INTO boardgames (name, min_players, max_players) VALUES (:name, :minPlayers, :maxPlayers)";
+        namedParameters.addValue("name", game.getName());
+        namedParameters.addValue("minPlayers", game.getMinPlayers());
+        namedParameters.addValue("maxPlayers", game.getMaxPlayers());
+
+        jdbc.update(query, namedParameters);
     }
 
-    public int addReview(Review review) {
-        MapSqlParameterSource namedParameters = new MapSqlParameterSource();
-        String query = "INSERT INTO reviews (gameId, text) VALUES (:gameId, :text)";
-        namedParameters.addValue("gameId", review.getGameId())
-                .addValue("text", review.getText());
+    // --- Review Operations ---
 
-        return jdbc.update(query, namedParameters);
-    }
-
-    public int deleteReview(Long id) {
+    public List<Review> getReviews(Long gameId) {
         MapSqlParameterSource namedParameters = new MapSqlParameterSource();
-        String query = "DELETE FROM reviews WHERE id = :id";
-        namedParameters.addValue("id", id);
-        return jdbc.update(query, namedParameters);
+        String query = "SELECT * FROM reviews WHERE game_id = :gameId";
+        namedParameters.addValue("gameId", gameId);
+
+        return jdbc.query(query, namedParameters, new BeanPropertyRowMapper<>(Review.class));
     }
 
     public Review getReview(Long id) {
         MapSqlParameterSource namedParameters = new MapSqlParameterSource();
         String query = "SELECT * FROM reviews WHERE id = :id";
         namedParameters.addValue("id", id);
-        BeanPropertyRowMapper<Review> reviewMapper = BeanPropertyRowMapper.newInstance(Review.class);
-        List<Review> reviews = jdbc.query(query, namedParameters, reviewMapper);
-        if (reviews.isEmpty()) {
-            return null;
-        } else {
-            return reviews.get(0);
-        }
+
+        List<Review> reviews = jdbc.query(query, namedParameters, new BeanPropertyRowMapper<>(Review.class));
+        return reviews.isEmpty() ? null : reviews.get(0);
     }
 
-    public int editReview(Review review) {
+    public void addReview(Review review) {
+        MapSqlParameterSource namedParameters = new MapSqlParameterSource();
+        String query = "INSERT INTO reviews (game_id, text) VALUES (:gameId, :text)";
+        namedParameters.addValue("gameId", review.getGameId());
+        namedParameters.addValue("text", review.getText());
+
+        jdbc.update(query, namedParameters);
+    }
+
+    public void editReview(Review review) {
         MapSqlParameterSource namedParameters = new MapSqlParameterSource();
         String query = "UPDATE reviews SET text = :text WHERE id = :id";
-        namedParameters
-                .addValue("text", review.getText())
-                .addValue("id", review.getId());
-        return jdbc.update(query, namedParameters);
+        namedParameters.addValue("text", review.getText());
+        namedParameters.addValue("id", review.getId());
+
+        jdbc.update(query, namedParameters);
+    }
+
+    public void deleteReview(Long id) {
+        MapSqlParameterSource namedParameters = new MapSqlParameterSource();
+        String query = "DELETE FROM reviews WHERE id = :id";
+        namedParameters.addValue("id", id);
+
+        jdbc.update(query, namedParameters);
+    }
+
+    // --- Security & Roles ---
+
+    public List<String> getAuthorities() {
+        String query = "SELECT authority FROM sec_authority";
+        return jdbc.queryForList(query, new MapSqlParameterSource(), String.class);
     }
 }
