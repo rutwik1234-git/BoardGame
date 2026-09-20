@@ -1,0 +1,9 @@
+/home/ec2-user/BoardGame/src/main/java/com/javaproject/controllers/HomeController.java
+/home/ec2-user/BoardGame/src/main/java/com/javaproject/security/SecurityConfig.java
+/home/ec2-user/BoardGame/src/main/java/com/javaproject/beans/Review.java
+/home/ec2-user/BoardGame/src/main/java/com/javaproject/security/LoggingAccessDeniedHandler.java
+/home/ec2-user/BoardGame/src/main/java/com/javaproject/database/DatabaseAccess.java
+/home/ec2-user/BoardGame/src/main/java/com/javaproject/controllers/BoardGameController.java
+/home/ec2-user/BoardGame/src/main/java/com/javaproject/beans/BoardGame.java
+/home/ec2-user/BoardGame/src/main/java/com/javaproject/beans/ErrorMessage.java
+/home/ec2-user/BoardGame/src/main/java/com/javaproject/DatabaseServiceProjectApplication.java
