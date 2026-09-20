@@ -10,7 +10,6 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.config.annotation.web.configurers.HeadersConfigurer;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.provisioning.JdbcUserDetailsManager;
@@ -32,9 +31,9 @@ public class SecurityConfig {
     }
 
     @Bean
-    public UserDetailsService userDetailsService(PasswordEncoder passwordEncoder) {
+    public JdbcUserDetailsManager userDetailsService(PasswordEncoder passwordEncoder) {
         JdbcUserDetailsManager manager = new JdbcUserDetailsManager(dataSource);
-        
+
         // Define users if they don't already exist in DB
         if (!manager.userExists("bugs")) {
             UserDetails bugs = User.builder()
