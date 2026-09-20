@@ -5,6 +5,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
+import org.springframework.jdbc.support.GeneratedKeyHolder;
+import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
 
 import com.javaproject.beans.BoardGame;
@@ -32,19 +34,21 @@ public class DatabaseAccess {
         return games.isEmpty() ? null : games.get(0);
     }
 
-    // Alias for getBoardGame to maintain compatibility across controllers
     public BoardGame getBoardGameById(Long id) {
         return getBoardGame(id);
     }
 
-    public void addBoardGame(BoardGame game) {
+    public Long addBoardGame(BoardGame game) {
         MapSqlParameterSource namedParameters = new MapSqlParameterSource();
+        KeyHolder keyHolder = new GeneratedKeyHolder();
+
         String query = "INSERT INTO boardgames (name, min_players, max_players) VALUES (:name, :minPlayers, :maxPlayers)";
         namedParameters.addValue("name", game.getName());
         namedParameters.addValue("minPlayers", game.getMinPlayers());
         namedParameters.addValue("maxPlayers", game.getMaxPlayers());
 
-        jdbc.update(query, namedParameters);
+        jdbc.update(query, namedParameters, keyHolder);
+        return (keyHolder.getKey() != null) ? keyHolder.getKey().longValue() : 1L;
     }
 
     // --- Review Operations ---
@@ -66,30 +70,30 @@ public class DatabaseAccess {
         return reviews.isEmpty() ? null : reviews.get(0);
     }
 
-    public void addReview(Review review) {
+    public int addReview(Review review) {
         MapSqlParameterSource namedParameters = new MapSqlParameterSource();
         String query = "INSERT INTO reviews (game_id, text) VALUES (:gameId, :text)";
         namedParameters.addValue("gameId", review.getGameId());
         namedParameters.addValue("text", review.getText());
 
-        jdbc.update(query, namedParameters);
+        return jdbc.update(query, namedParameters);
     }
 
-    public void editReview(Review review) {
+    public int editReview(Review review) {
         MapSqlParameterSource namedParameters = new MapSqlParameterSource();
         String query = "UPDATE reviews SET text = :text WHERE id = :id";
         namedParameters.addValue("text", review.getText());
         namedParameters.addValue("id", review.getId());
 
-        jdbc.update(query, namedParameters);
+        return jdbc.update(query, namedParameters);
     }
 
-    public void deleteReview(Long id) {
+    public int deleteReview(Long id) {
         MapSqlParameterSource namedParameters = new MapSqlParameterSource();
         String query = "DELETE FROM reviews WHERE id = :id";
         namedParameters.addValue("id", id);
 
-        jdbc.update(query, namedParameters);
+        return jdbc.update(query, namedParameters);
     }
 
     // --- Security & Roles ---
