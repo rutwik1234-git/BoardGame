@@ -2,8 +2,8 @@ pipeline {
     agent any
 
     tools {
-        jdk 'JDK21'     // Ensure this matches your JDK 21 name in Jenkins Tools
-        maven 'maven3'  // Ensure this matches your Maven name in Jenkins Tools
+        jdk 'JDK21'     // Capitalized to match Jenkins Global Tools configuration
+        maven 'maven3'
     }
 
     stages {
@@ -17,9 +17,11 @@ pipeline {
 
         stage('Build') {
             steps {
-                // Verifies Java version before executing Maven
-                sh 'java -version'
-                sh 'mvn clean package'
+                sh '''
+                    export JAVA_HOME=/usr/lib/jvm/java-21-amazon-corretto.x86_64
+                    export PATH=$JAVA_HOME/bin:$PATH
+                    mvn clean package
+                '''
             }
         }
 
